@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Plans</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 50px 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 900px;
+            width: 100%;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 2.5em;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 50px;
+            font-size: 1.1em;
+        }
+        
+        .plans {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .plan-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 15px;
+            padding: 35px 25px;
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 3px solid transparent;
+        }
+        
+        .plan-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+        }
+        
+        .plan-card.silver {
+            background: linear-gradient(135deg, #bdc3c7 0%, #95a5a6 100%);
+            border-color: #7f8c8d;
+        }
+        
+        .plan-card.gold {
+            background: linear-gradient(135deg, #f7b733 0%, #fc4a1a 100%);
+            border-color: #e67e22;
+        }
+        
+        .plan-card.platinum {
+            background: linear-gradient(135deg, #434343 0%, #000000 100%);
+            border-color: #2c3e50;
+        }
+        
+        .plan-card.platinum h2,
+        .plan-card.platinum .price {
+            color: white;
+        }
+        
+        .plan-card h2 {
+            font-size: 2em;
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+        
+        .plan-card .price {
+            font-size: 1.5em;
+            margin-bottom: 25px;
+            color: #34495e;
+            font-weight: bold;
+        }
+        
+        .plan-button {
+            background: white;
+            color: #333;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.1em;
+            font-weight: 600;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .plan-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+        
+        .plan-button:active {
+            transform: scale(0.98);
+        }
+        
+        .plan-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .footer {
+            text-align: center;
+            color: #999;
+            margin-top: 30px;
+            font-size: 0.9em;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 30px 20px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+            
+            .plans {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Choose Your Plan</h1>
+        <p class="subtitle">Select a plan to proceed with payment</p>
+        
+        <div class="plans">
+            <div class="plan-card silver">
+                <h2>Silver</h2>
+                <div class="price">₹1</div>
+                <button class="plan-button" onclick="createPayment('silver')">Select Silver</button>
+            </div>
+            
+            <div class="plan-card gold">
+                <h2>Gold</h2>
+                <div class="price">₹2</div>
+                <button class="plan-button" onclick="createPayment('gold')">Select Gold</button>
+            </div>
+            
+            <div class="plan-card platinum">
+                <h2>Platinum</h2>
+                <div class="price">₹3</div>
+                <button class="plan-button" onclick="createPayment('platinum')">Select Platinum</button>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>Secure payment powered by PhonePe</p>
+        </div>
+    </div>
+    
+    <script>
+        async function createPayment(plan) {
+            const button = event.target;
+            button.disabled = true;
+            button.textContent = 'Creating link...';
+            
+            try {
+                const response = await fetch(`/api/create-payment/${plan}`);
+                const data = await response.json();
+                
+                if (data.success && data.payment_url) {
+                    console.log('Payment link:', data.payment_url);
+                    console.log('Order ID:', data.order_id);
+                    
+                    // Redirect to payment page
+                    window.location.href = data.payment_url;
+                } else {
+                    alert('Failed to create payment link: ' + (data.error || 'Unknown error'));
+                    button.disabled = false;
+                    button.textContent = `Select ${plan.charAt(0).toUpperCase() + plan.slice(1)}`;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to create payment link');
+                button.disabled = false;
+                button.textContent = `Select ${plan.charAt(0).toUpperCase() + plan.slice(1)}`;
+            }
+        }
+    </script>
+</body>
+</html>
+
