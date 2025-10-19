@@ -1,0 +1,129 @@
+PhonePe Payment App - Deployment Guide
+=======================================
+
+OVERVIEW
+--------
+This Flask application handles PhonePe payment integration with real-time status logging.
+It creates payment links, processes callbacks, and logs payment statuses to the console.
+
+FEATURES
+--------
+- Create payment links for Silver/Gold/Platinum plans
+- Automatic payment status checking
+- Console logging of all payment events
+- Callback handling after payment completion
+- Production-ready with environment variable configuration
+
+LOCAL DEVELOPMENT
+-----------------
+1. Create a virtual environment:
+   python -m venv menv
+   source menv/bin/activate  # On Windows: menv\Scripts\activate
+
+2. Install dependencies:
+   pip install -r requirements.txt
+
+3. Configure environment variables:
+   - Copy config.env.example to config.env
+   - Update with your PhonePe credentials
+   - Set BASE_URL to http://localhost:5000
+
+4. Run the application:
+   python f.py
+
+5. Access the app at http://localhost:5000
+
+PRODUCTION DEPLOYMENT
+--------------------
+
+Option 1: Heroku Deployment
+---------------------------
+1. Install Heroku CLI
+2. Login: heroku login
+3. Create app: heroku create your-app-name
+4. Set environment variables:
+   heroku config:set PHONEPE_CLIENT_ID=your_id
+   heroku config:set PHONEPE_CLIENT_SECRET=your_secret
+   heroku config:set BASE_URL=https://your-app-name.herokuapp.com
+   heroku config:set FLASK_DEBUG=False
+
+5. Deploy:
+   git add .
+   git commit -m "Deploy payment app"
+   git push heroku master
+
+6. View logs (to see payment status):
+   heroku logs --tail
+
+Option 2: VPS/Server Deployment
+-------------------------------
+1. Install dependencies on server:
+   pip install -r requirements.txt
+
+2. Create config.env with production values:
+   PHONEPE_CLIENT_ID=your_id
+   PHONEPE_CLIENT_SECRET=your_secret
+   BASE_URL=https://yourdomain.com
+   PORT=5000
+   FLASK_DEBUG=False
+
+3. Run with gunicorn:
+   gunicorn -w 4 -b 0.0.0.0:5000 f:app
+
+4. Use a process manager (systemd, supervisor) to keep it running
+5. Set up nginx as reverse proxy
+6. Configure SSL certificate
+
+Option 3: Docker Deployment
+---------------------------
+1. Create a Dockerfile (see example below)
+2. Build: docker build -t phonepe-payment-app .
+3. Run: docker run -p 5000:5000 --env-file config.env phonepe-payment-app
+
+ENVIRONMENT VARIABLES
+--------------------
+Required:
+- PHONEPE_CLIENT_ID: Your PhonePe merchant ID
+- PHONEPE_CLIENT_SECRET: Your PhonePe secret key
+- BASE_URL: Your app's public URL (for callbacks)
+
+Optional:
+- PHONEPE_CLIENT_VERSION: Default "1"
+- PHONEPE_ENV: PRODUCTION or UAT (default PRODUCTION)
+- PORT: Server port (default 5000)
+- FLASK_DEBUG: True/False (default True, set False in production)
+
+VIEWING PAYMENT LOGS
+--------------------
+All payment events are logged to console with timestamps:
+- Payment link creation
+- Payment callbacks
+- Status checks
+
+To monitor:
+- Local: Check terminal output
+- Heroku: heroku logs --tail
+- Server: Use journalctl or your process manager's logs
+
+API ENDPOINTS
+-------------
+GET  /                              - Payment plans page
+GET  /api/create-payment/<plan>    - Create payment link (silver/gold/platinum)
+GET  /api/check-payment-status/<order_id> - Check payment status
+GET  /payment-callback              - Payment redirect callback
+
+IMPORTANT NOTES
+--------------
+1. Always use HTTPS in production
+2. Never commit config.env with real credentials
+3. Update BASE_URL to your production domain
+4. Monitor logs for payment status updates
+5. Test with PhonePe UAT environment first before going live
+
+TROUBLESHOOTING
+--------------
+- If payments fail, check PhonePe credentials
+- Ensure BASE_URL is accessible from internet (for callbacks)
+- Check logs for detailed error messages
+- Verify callback URL is whitelisted in PhonePe dashboard
+

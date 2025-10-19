@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Status</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 50px 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+        }
+        
+        .status-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+        
+        .status-icon.success {
+            color: #27ae60;
+        }
+        
+        .status-icon.pending {
+            color: #f39c12;
+        }
+        
+        .status-icon.failed {
+            color: #e74c3c;
+        }
+        
+        .status-icon.unknown {
+            color: #95a5a6;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 2em;
+        }
+        
+        .status-text {
+            color: #666;
+            font-size: 1.2em;
+            margin-bottom: 30px;
+        }
+        
+        .details {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+            text-align: left;
+        }
+        
+        .details-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .details-row:last-child {
+            border-bottom: none;
+        }
+        
+        .details-label {
+            font-weight: 600;
+            color: #555;
+        }
+        
+        .details-value {
+            color: #333;
+            font-family: monospace;
+        }
+        
+        .action-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.1em;
+            font-weight: 600;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            margin: 5px;
+        }
+        
+        .action-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+        
+        .action-button.secondary {
+            background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 30px 20px;
+            }
+            
+            h1 {
+                font-size: 1.5em;
+            }
+            
+            .status-icon {
+                font-size: 60px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        {% if status == 'COMPLETED' %}
+            <div class="status-icon success">✓</div>
+            <h1>Payment Successful!</h1>
+            <p class="status-text">Your payment has been completed successfully.</p>
+        {% elif status == 'PENDING' %}
+            <div class="status-icon pending">⏳</div>
+            <h1>Payment Pending</h1>
+            <p class="status-text">Your payment is being processed. Please wait...</p>
+        {% elif status == 'FAILED' %}
+            <div class="status-icon failed">✗</div>
+            <h1>Payment Failed</h1>
+            <p class="status-text">Unfortunately, your payment could not be processed.</p>
+        {% elif status == 'error' %}
+            <div class="status-icon failed">⚠</div>
+            <h1>Error</h1>
+            <p class="status-text">An error occurred while processing your request.</p>
+        {% else %}
+            <div class="status-icon unknown">?</div>
+            <h1>Unknown Status</h1>
+            <p class="status-text">Unable to determine payment status.</p>
+        {% endif %}
+        
+        {% if order_id %}
+        <div class="details">
+            <div class="details-row">
+                <span class="details-label">Order ID:</span>
+                <span class="details-value">{{ order_id }}</span>
+            </div>
+            <div class="details-row">
+                <span class="details-label">Status:</span>
+                <span class="details-value">{{ status }}</span>
+            </div>
+            {% if timestamp %}
+            <div class="details-row">
+                <span class="details-label">Time:</span>
+                <span class="details-value">{{ timestamp }}</span>
+            </div>
+            {% endif %}
+            {% if error %}
+            <div class="details-row">
+                <span class="details-label">Error:</span>
+                <span class="details-value">{{ error }}</span>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+        
+        <div>
+            <a href="/" class="action-button">Back to Home</a>
+            {% if order_id and status == 'PENDING' %}
+            <button onclick="checkStatus('{{ order_id }}')" class="action-button secondary">Check Status</button>
+            {% endif %}
+        </div>
+    </div>
+    
+    <script>
+        async function checkStatus(orderId) {
+            try {
+                const response = await fetch(`/api/check-payment-status/${orderId}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Reload page to show updated status
+                    window.location.reload();
+                } else {
+                    alert('Failed to check status: ' + (data.error || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to check payment status');
+            }
+        }
+        
+        // Auto-refresh for pending payments
+        {% if status == 'PENDING' %}
+        setTimeout(function() {
+            window.location.reload();
+        }, 5000); // Refresh every 5 seconds
+        {% endif %}
+    </script>
+</body>
+</html>
+
