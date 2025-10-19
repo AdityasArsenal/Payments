@@ -4,3 +4,4 @@ Flask
 requests
 python-dotenv
 phonepe_sdk
+gunicorn
