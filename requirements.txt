@@ -1,3 +1,6 @@
+--index-url https://phonepe.mycloudrepo.io/public/repositories/phonepe-pg-sdk-python
+--extra-index-url https://pypi.org/simple
 Flask
 requests
 python-dotenv
+phonepe_sdk
