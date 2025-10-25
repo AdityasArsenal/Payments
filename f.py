@@ -44,6 +44,26 @@ def home():
     """Serve the payment plans page"""
     return render_template('index.html')
 
+@app.route('/terms')
+def terms():
+    """Serve the terms and conditions page"""
+    return render_template('terms.html')
+
+@app.route('/privacy')
+def privacy():
+    """Serve the privacy policy page"""
+    return render_template('privacy.html')
+
+@app.route('/refund')
+def refund():
+    """Serve the refund policy page"""
+    return render_template('refund.html')
+
+@app.route('/contact')
+def contact():
+    """Serve the contact page"""
+    return render_template('contact.html')
+
 @app.route('/api/create-payment/<plan>')
 def create_payment(plan):
     """Generate payment link for selected plan"""
@@ -77,9 +97,9 @@ def create_payment(plan):
         checkout_page_url = standard_pay_response.redirect_url
         
         # Log for debugging
-        print(f"Payment link created for {plan} plan (₹{amount/100})")
-        print(f"Order ID: {unique_order_id}")
-        print(f"Checkout URL: {checkout_page_url}")
+        # print(f"Payment link created for {plan} plan (₹{amount/100})")
+        # print(f"Order ID: {unique_order_id}")
+        # print(f"Checkout URL: {checkout_page_url}")
         
         # Return payment link as JSON
         return jsonify({

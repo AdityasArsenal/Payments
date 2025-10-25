@@ -118,6 +118,33 @@
             background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
         }
         
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        .footer-links {
+            margin-top: 15px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            font-size: 0.9em;
+        }
+        
+        .footer-links a {
+            color: #667eea;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        .footer-links a:hover {
+            color: #764ba2;
+            text-decoration: underline;
+        }
+        
         @media (max-width: 600px) {
             .container {
                 padding: 30px 20px;
@@ -187,6 +214,15 @@
             {% if order_id and status == 'PENDING' %}
             <button onclick="checkStatus('{{ order_id }}')" class="action-button secondary">Check Status</button>
             {% endif %}
+        </div>
+        
+        <div class="footer">
+            <div class="footer-links">
+                <a href="/terms">Terms & Conditions</a>
+                <a href="/privacy">Privacy Policy</a>
+                <a href="/refund">Refund Policy</a>
+                <a href="/contact">Contact Us</a>
+            </div>
         </div>
     </div>
     
